@@ -59,10 +59,7 @@ class Affichagevacance extends Module
      */
     public function install()
     {
-        Configuration::updateValue('AFFICHAGEVACANCE_TEXT', '');
-        Configuration::updateValue('AFFICHAGEVACANCE_FROM', '');
-        Configuration::updateValue('AFFICHAGEVACANCE_TO', '');
-
+        //include(__DIR__ . '/sql/install.php');
         return parent::install() &&
             $this->registerHook('header') &&
             $this->registerHook('backOfficeHeader') &&
@@ -71,10 +68,7 @@ class Affichagevacance extends Module
 
     public function uninstall()
     {
-        Configuration::deleteByName('AFFICHAGEVACANCE_TEXT');
-        Configuration::deleteByName('AFFICHAGEVACANCE_FROM');
-        Configuration::deleteByName('AFFICHAGEVACANCE_TO');
-
+        //include(__DIR__ . '/sql/uninstall.php');
         return parent::uninstall();
     }
 
@@ -162,6 +156,14 @@ class Affichagevacance extends Module
                         'name' => 'AFFICHAGEVACANCE_TO',
                         'required' => true,
                     ),
+                    array(
+                        'type' => 'text',
+                        //'prefix' => '<i class="icon icon-envelope"></i>',
+                        'label' => $this->l('Adresse ip pour les tests'),
+                        'name' => 'AFFICHAGEVACANCE_IP_LIST',
+                        'desc' => $this->l('il faut séparer les adresses IP par une virgule'),
+                        'required' => true,
+                    ),
                 ),
                 'submit' => array(
                     'title' => $this->l('Save'),
@@ -175,10 +177,12 @@ class Affichagevacance extends Module
      */
     protected function getConfigFormValues()
     {
+        $varr = Db::getInstance()->executeS('select * from ' . _DB_PREFIX_ . 'vacances')[0];
         return array(
-            'AFFICHAGEVACANCE_TEXT' => Configuration::get('AFFICHAGEVACANCE_TEXT'),
-            'AFFICHAGEVACANCE_FROM' => Configuration::get('AFFICHAGEVACANCE_FROM'),
-            'AFFICHAGEVACANCE_TO' => Configuration::get('AFFICHAGEVACANCE_TO'),
+            'AFFICHAGEVACANCE_TEXT' => $varr['text'],
+            'AFFICHAGEVACANCE_FROM' => $varr['date_from'],
+            'AFFICHAGEVACANCE_TO' => $varr['date_to'],
+            'AFFICHAGEVACANCE_IP_LIST' => $varr['ip_list']
         );
     }
 
@@ -187,11 +191,13 @@ class Affichagevacance extends Module
      */
     protected function postProcess()
     {
-        $form_values = $this->getConfigFormValues();
-
-        foreach (array_keys($form_values) as $key) {
-            Configuration::updateValue($key, Tools::getValue($key));
-        }
+        Db::getInstance()->execute(
+            'update ' . _DB_PREFIX_ . 'vacances set 
+            text = \'' . Tools::getValue('AFFICHAGEVACANCE_TEXT') . '\', 
+            date_from=\'' . Tools::getValue('AFFICHAGEVACANCE_FROM') . '\', 
+            date_to=\'' . Tools::getValue('AFFICHAGEVACANCE_TO') . '\',
+            ip_list=\'' . str_replace(" ", "", Tools::getValue('AFFICHAGEVACANCE_IP_LIST')) . '\''
+        );
     }
 
     /**
@@ -216,6 +222,20 @@ class Affichagevacance extends Module
 
     public function hookDisplayHome()
     {
-        /* Place your code here. */
+        $config = Db::getInstance()->executeS('select * from ' . _DB_PREFIX_ . 'vacances')[0];
+        if (Module::isEnabled($this->name)) {
+            $this->context->smarty->assign(
+                [
+                    'vacance' =>
+                    [
+                        'text' => $config['text'],
+                        'from' => $config['date_from'],
+                        'to' => $config['date_to'],
+                        'ip_list' => explode(",", $config['ip_list']),
+                    ]
+                ]
+            );
+            return $this->display(__FILE__, 'views/templates/front/hook/home.tpl');
+        }
     }
 }

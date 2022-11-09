@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+    <name>affichagevacance</name>
+    <displayName><![CDATA[Affichage vacances]]></displayName>
+    <version><![CDATA[1.0.0]]></version>
+    <description><![CDATA[Permet de plannifier et de definir un message de vacance sur la page daccueil]]></description>
+    <author><![CDATA[Valentin Duplan]]></author>
+    <tab><![CDATA[administration]]></tab>
+    <is_configurable>1</is_configurable>
+    <need_instance>0</need_instance>
+	<limited_countries></limited_countries>
+</module>
