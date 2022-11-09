@@ -59,7 +59,7 @@ class Affichagevacance extends Module
      */
     public function install()
     {
-        //include(__DIR__ . '/sql/install.php');
+        include(__DIR__ . '/sql/install.php');
         return parent::install() &&
             $this->registerHook('header') &&
             $this->registerHook('backOfficeHeader') &&
@@ -68,7 +68,7 @@ class Affichagevacance extends Module
 
     public function uninstall()
     {
-        //include(__DIR__ . '/sql/uninstall.php');
+        include(__DIR__ . '/sql/uninstall.php');
         return parent::uninstall();
     }
 
